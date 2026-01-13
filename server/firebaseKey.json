@@ -1,0 +1,13 @@
+{
+    "type": "service_account",
+  "project_id": "agenceimmobiliere-b7a1b",
+  "private_key_id": "27c5e6d76ac931a6fa783de7bb7bc316b94c12f8",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCzENKe45XWNV9R\n05CM1pNkTt6E9EKEQo6DCitUGaRGL1o9rjpkSinam81L+2E/o8ps/g68Kfy6n3C1\ne8zSQthK2UySrJLayvEKcoHkqyvDtrc62+d0fAln0Hfdw7b1uIdxn63x0cgJR4fc\n/l74ae4G9TL5fk3dcdqhJGmBn6xcYFqZo/JmR6tCWsprKGuFOyZVz7hrTnWpfZfQ\nuDSyMdz1fNph0Bj/cZJyjgq/j6t9Z3lR97oHbBVwjX94bPSQ+TSU9us7HamC+jDZ\nhnjGTnsPLDtJ5vJUIhX/cyZbjRjocPwHVOek2/lXqcZtTI3qrsF9dnEEpUVaWWsw\nfV9ORozxAgMBAAECggEADfx5BQPP8OOpkq+4jUWXzNiLsR0Ognvb24CcdoTLs9cw\nQFvWz/1KdFqhwAbuFz1M+vMjlb8eUDnSoPw+2OfzcrIzFMxBqrD5/4fG3URg5lgj\nyudA9nRXPDp4WFQYeuwbOSzglmAdNJtXkXN1WcgVWUoG3Z2nyY2CZv579q3Q9cSH\n5jYK/tVPP9/PW/BXDu9YOK0z6tt6wgBRaTdYkH6BE90YJXQDnBHUv1rQPlzkwplP\nj7TM3lc+N472W0mPT4vJpunDhD5jgcR6mc0AbXkwnlEYpuV5HUN5kswHJ5y2E1Rb\nLpRB66LTjdr8IaXvY/p7b3788OwOQvsCawcWm/NceQKBgQDhAP7dojYLMcMa5elt\nzelrpmXmWVlIwOIvVjTVPGYbpwmLb11gJsuBOzRH5qSK+89d6+degXoVwUQYiAkL\nn8H8dhPLvQus80+rk4kpKOu0yG4ne0wr35f0vqgVu15UgtpxThG2qNqdBnf629nS\nxLn8SGtUL8uhinJHI/z6bvStOQKBgQDLu8SYsd/lzvZuqZzjCLK/vdOaBG9VgYlw\nl1Tnp4DfYDu1SswJ3bvplfGAhiGDl0OeMgDM5B3eNlhNqiw69HlXtH43hCBW9fOn\n344819lbxXdB0uMD+1746XGnahI9MKk9OogJqY5dA7Tv6coMXTsb3WWPhg0/kDNJ\noVcVmMMVeQKBgBR+M7hZ+tQgLyX3BMC0fWsJl8RYJPKkZrVrA5rcSmyAVTU26mlE\nf0qA6u0Vi60A7E0gnE0WO9lZZetaEIDXhyKIWps216Zj7sCwylBOYtFvY+ECsNha\nIAvxhXudOiU2WdDyDFj3nhmpKipV9cvlkQ7yRZxAUiqfYnMqSvNAQda5AoGBAK70\nDOyvez0m0HrRjtdsRcvgoJDXlCASgEs+uXvBXSr1wfB6TeN/FXqO9/fNt4QAZuG3\nwPYyQu/rLUNsilUKUhWd+vGDth3XUijsEoJvPcnQNgxBpA9sUu9f0OjabtU7L2pU\nFDRv9cAsibmow4iAm1zfb/KjREc8dr6ZHWZ/a6/JAoGBANFycRxHuiS8o0vTfJfx\nOIdQvn2cUMBu4KTRxRm4VGzq3Mw7KlRwQ7eYpWwB64Z9xfGZ6CxTrIqW3Yplxr8I\n/gIV6pXdawduJBBPqpjtyS7iByCbBdVgZQxrUcNshwAEwp5twyfhIIAyadFB+/Qm\nfi7L+UZumkeH09q0mCdMe953\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@agenceimmobiliere-b7a1b.iam.gserviceaccount.com",
+  "client_id": "117779059925906199015",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40agenceimmobiliere-b7a1b.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
