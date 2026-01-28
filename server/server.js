@@ -746,27 +746,51 @@ app.post('/api/admin/offres', requireAdmin, upload.array('photos', 6), async (re
       videoUrl = ''
     } = req.body;
 
-    const priceNum = price ?  Number(price) : null;
+    const priceNum = price ? Number(price) : null;
     const publishedBool = (published === 'true' || published === true);
+
+    // ----------- Génération automatique de la référence -----------
+    const isLocation = type && type.toLowerCase().includes("louer");
+    const prefix = isLocation ? "L" : "V";
+    let reference = "";
+
+    if (USING_FIREBASE) {
+      const db = admin.firestore();
+      const sameTypeSnap = await db.collection('annonces')
+        .where('type', '==', type)
+        .get();
+      reference = prefix + String(sameTypeSnap.size + 1).padStart(4, "0");
+    } else {
+      const offres = readJson(OFFRES_FILE);
+      const nbrType = offres.filter(o =>
+        o.type && (
+          isLocation
+            ? o.type.toLowerCase().includes("louer")
+            : o.type.toLowerCase().includes("vendre")
+        )
+      ).length;
+      reference = prefix + String(nbrType + 1).padStart(4, "0");
+    }
+    // ----------- /Génération automatique de la référence -----------
 
     // Upload photos vers Firebase Storage
     const photoPaths = [];
-    if (USING_FIREBASE && req.files && req.files. length > 0) {
+    if (USING_FIREBASE && req.files && req.files.length > 0) {
       for (const file of req.files) {
         try {
           const url = await uploadPhotoToFirebase(file);
           photoPaths.push(url);
         } catch (error) {
           console.error('Failed to upload file:', error);
-          return res. status(500).json({ error: 'Failed to upload photo' });
+          return res.status(500).json({ error: 'Failed to upload photo' });
         }
       }
     } else if (req.files && req.files.length > 0) {
       // Fallback local
-      photoPaths.push(... req.files.map(f => `/uploads/${path.basename(f.path)}`));
+      photoPaths.push(...req.files.map(f => `/uploads/${path.basename(f.path)}`));
     }
 
-    const createdAt = new Date(). toISOString();
+    const createdAt = new Date().toISOString();
 
     if (USING_FIREBASE) {
       // Ajouter à Firestore
@@ -778,10 +802,11 @@ app.post('/api/admin/offres', requireAdmin, upload.array('photos', 6), async (re
         descript,
         price: priceNum,
         type,
+        reference, // <---- Ici on ajoute la référence générée
         published: publishedBool,
-        localisation: (lat && lng) ? { 
-          lat: Number(lat), 
-          lng: Number(lng) 
+        localisation: (lat && lng) ? {
+          lat: Number(lat),
+          lng: Number(lng)
         } : null,
         photoPaths,
         photos: photoPaths,
@@ -793,8 +818,8 @@ app.post('/api/admin/offres', requireAdmin, upload.array('photos', 6), async (re
 
       await docRef.set(annonce);
 
-      return res.status(201). json({ 
-        ok: true, 
+      return res.status(201).json({
+        ok: true,
         annonce: {
           id: docRef.id,
           ...annonce
@@ -803,7 +828,7 @@ app.post('/api/admin/offres', requireAdmin, upload.array('photos', 6), async (re
     } else {
       // Fallback fichier JSON
       const offres = readJson(OFFRES_FILE);
-      const nextId = offres.length ?  (Math.max(...offres. map(o => Number(o. id) || 0)) + 1) : 1;
+      const nextId = offres.length ? (Math.max(...offres.map(o => Number(o.id) || 0)) + 1) : 1;
 
       const annonce = {
         id: nextId,
@@ -811,6 +836,7 @@ app.post('/api/admin/offres', requireAdmin, upload.array('photos', 6), async (re
         descript,
         price: priceNum,
         type,
+        reference, // <---- Ici aussi
         published: publishedBool,
         localisation: (lat && lng) ? { lat: Number(lat), lng: Number(lng) } : null,
         photoPaths,

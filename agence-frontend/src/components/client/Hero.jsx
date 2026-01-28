@@ -17,7 +17,7 @@ export default function Hero() {
 
           <div className="mt-8 flex flex-wrap gap-4">
             <a href="/annonces" className="px-5 py-3 rounded-md text-white font-medium" style={{background: "linear-gradient(90deg,var(--brand),var(--brand-2))"}}>Voir les annonces</a>
-            <a href="/annonces/create" className="px-5 py-3 rounded-md border border-white/20 glass text-white">Ajouter votre bien a vendre/ a louer</a>
+            
           </div>
 
           {/* SearchBar connecté au SearchContext */}

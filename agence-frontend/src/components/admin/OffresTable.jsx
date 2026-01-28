@@ -6,12 +6,31 @@ import ExportExcel from "./ExportExcel";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
+// Barre de recherche intelligente simple
+function SearchBar({ value, onChange, placeholder = "Recherche par référence, adresse, type, prix..." }) {
+  return (
+    <input
+      type="search"
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      placeholder={placeholder}
+      aria-label={placeholder}
+      className="border px-4 py-2 mr-2 rounded-lg shadow-sm"
+      style={{ width: 320, maxWidth: "95vw", fontSize: 15 }}
+      autoComplete="off"
+    />
+  );
+}
+
 export default function OffresTable() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
   const nav = useNavigate();
+
+  // Ajout de l'état pour la recherche
+  const [search, setSearch] = useState("");
 
   const [lbOpen, setLbOpen] = useState(false);
   const [lbImages, setLbImages] = useState([]);
@@ -28,12 +47,12 @@ export default function OffresTable() {
       setErr("");
       try {
         const res = await fetch(`${API}/api/admin/offres`, { credentials: "include" });
-        if (!res. ok) {
-          const body = await res.json(). catch(() => ({}));
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
           throw new Error(body.error || `Erreur ${res.status}`);
         }
         const json = await res.json();
-        if (! mounted) return;
+        if (!mounted) return;
         setData(json);
       } catch (e) {
         if (!mounted) return;
@@ -57,7 +76,7 @@ export default function OffresTable() {
 
   function formatPrice(v) {
     if (v == null) return "-";
-    return Number(v). toLocaleString("fr-FR") + " TND";
+    return Number(v).toLocaleString("fr-FR") + " TND";
   }
 
   function formatDate(iso) {
@@ -68,10 +87,10 @@ export default function OffresTable() {
 
   function openLightboxForOffer(o, start = 0) {
     const images = (o.photoPaths || []).map(p => {
-      if (! p) return "";
+      if (!p) return "";
       if (p.startsWith("http://") || p.startsWith("https://")) return p;
       return `${API}${p}`;
-    }). filter(Boolean);
+    }).filter(Boolean);
     if (images.length === 0) return;
     setLbImages(images);
     setLbIndex(start);
@@ -79,7 +98,7 @@ export default function OffresTable() {
   }
 
   function openVideoPreview(videoId) {
-    if (! videoId) return;
+    if (!videoId) return;
     const embedUrl = getYouTubeEmbedUrl(videoId);
     setVideoPreviewUrl(embedUrl);
     setVideoPreviewOpen(true);
@@ -94,7 +113,7 @@ export default function OffresTable() {
         body: JSON.stringify({ published: !current })
       });
       const json = await res.json();
-      if (! res.ok) throw new Error(json.error || `Erreur ${res.status}`);
+      if (!res.ok) throw new Error(json.error || `Erreur ${res.status}`);
       setRefreshKey(k => k + 1);
     } catch (e) {
       alert("Erreur: " + (e.message || e));
@@ -102,7 +121,7 @@ export default function OffresTable() {
   }
 
   async function deleteOffer(id) {
-    if (! confirm("Supprimer cette annonce ?")) return;
+    if (!confirm("Supprimer cette annonce ?")) return;
     try {
       const res = await fetch(`${API}/api/admin/offres/${id}`, {
         method: "DELETE",
@@ -112,29 +131,43 @@ export default function OffresTable() {
       if (!res.ok) throw new Error(json.error || `Erreur ${res.status}`);
       setRefreshKey(k => k + 1);
     } catch (e) {
-      alert("Erreur: " + (e. message || e));
+      alert("Erreur: " + (e.message || e));
     }
+  }
+
+  // Filtrage intelligent local sur les offres
+  let filtered = data;
+  if (data && search.trim()) {
+    const q = search.toLowerCase();
+    filtered = data.filter((o) =>
+      (o.reference && o.reference.toLowerCase().includes(q)) ||
+      (o.adresse && o.adresse.toLowerCase().includes(q)) ||
+      (o.type && o.type.toLowerCase().includes(q)) ||
+      (o.price && String(o.price).toLowerCase().includes(q))
+    );
   }
 
   if (loading) return <div className="p-6">⏳ Chargement des offres…</div>;
   if (err) return <div className="p-6 text-red-600">❌ Erreur: {err}</div>;
-  if (! data || data.length === 0) return <div className="p-6">📭 Aucune offre trouvée. </div>;
+  if (!filtered || filtered.length === 0) return <div className="p-6">📭 Aucune offre trouvée. </div>;
 
- return (
+  return (
     <div className="p-6">
-      <div className="mb-6 flex justify-between items-center flex-wrap gap-4">
-        <h2 className="text-2xl font-semibold text-gray-900">Offres ({data.length})</h2>
-        
-        {/* ← BOUTON EXPORT */}
-        {data && data.length > 0 && (
-          <ExportExcel offres={data} />
-        )}
+      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between items-start flex-wrap gap-4">
+        <h2 className="text-2xl font-semibold text-gray-900">Offres ({filtered.length})</h2>
+        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          <SearchBar value={search} onChange={setSearch} />
+          {/* ← BOUTON EXPORT */}
+          {filtered && filtered.length > 0 && (
+            <ExportExcel offres={filtered} />
+          )}
+        </div>
       </div>
 
       {/* Tableau Responsive */}
-      <div style={{ 
-        overflowX: "auto", 
-        borderRadius: "12px", 
+      <div style={{
+        overflowX: "auto",
+        borderRadius: "12px",
         boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
         border: "1px solid #e5e7eb"
       }}>
@@ -146,7 +179,7 @@ export default function OffresTable() {
         }}>
           <thead>
             <tr style={{ background: "linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)", borderBottom: "2px solid #e5e7eb" }}>
-              <th style={{ padding: "16px", textAlign: "left", fontWeight: "700", color: "#1f2937", whiteSpace: "nowrap" }}>Reference</th>
+              <th style={{ padding: "16px", textAlign: "left", fontWeight: "700", color: "#1f2937", whiteSpace: "nowrap" }}>Référence</th>
               <th style={{ padding: "16px", textAlign: "left", fontWeight: "700", color: "#1f2937", whiteSpace: "nowrap" }}>Images</th>
               <th style={{ padding: "16px", textAlign: "left", fontWeight: "700", color: "#1f2937", whiteSpace: "nowrap" }}>Adresse</th>
               <th style={{ padding: "16px", textAlign: "left", fontWeight: "700", color: "#1f2937", whiteSpace: "nowrap" }}>Prix</th>
@@ -158,32 +191,32 @@ export default function OffresTable() {
             </tr>
           </thead>
           <tbody>
-            {data.map((o, idx) => (
-              <tr 
-                key={o.id} 
+            {filtered.map((o, idx) => (
+              <tr
+                key={o.id}
                 style={{
                   borderBottom: "1px solid #e5e7eb",
                   transition: "background 0.2s ease, boxShadow 0.2s ease",
                   background: idx % 2 === 0 ? "#ffffff" : "#fafbfc"
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.background = "#f0f4ff"}
-                onMouseLeave={(e) => e.currentTarget. style.background = idx % 2 === 0 ? "#ffffff" : "#fafbfc"}
+                onMouseLeave={(e) => e.currentTarget.style.background = idx % 2 === 0 ? "#ffffff" : "#fafbfc"}
               >
-                {/* ID */}
+                {/* Reference */}
                 <td style={{ padding: "16px", color: "#374151", fontWeight: "700", fontSize: "16px" }}>
-  #{idx + 1}
-</td>
+                  {o.reference || "-"}
+                </td>
 
                 {/* Images */}
                 <td style={{ padding: "16px" }}>
-                  <div 
-                    onClick={() => openLightboxForOffer(o, 0)} 
+                  <div
+                    onClick={() => openLightboxForOffer(o, 0)}
                     style={{ cursor: 'pointer', display: "inline-block" }}
                   >
                     {o.photoPaths && o.photoPaths.length > 0 ? (
                       <div style={{ position: "relative" }}>
                         <img
-                          src={(o.photoPaths[0]. startsWith("http") ? o. photoPaths[0] : `${API}${o.photoPaths[0]}`)}
+                          src={(o.photoPaths[0].startsWith("http") ? o.photoPaths[0] : `${API}${o.photoPaths[0]}`)}
                           alt="mini"
                           style={{
                             width: 100,
@@ -193,10 +226,10 @@ export default function OffresTable() {
                             transition: "transform 0.2s ease",
                             border: "2px solid #e5e7eb"
                           }}
-                          onMouseEnter={(e) => e. currentTarget.style.transform = "scale(1.08)"}
+                          onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.08)"}
                           onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
                           onError={(e) => {
-                            e.currentTarget. onerror = null;
+                            e.currentTarget.onerror = null;
                             e.currentTarget.src = `${API}/uploads/placeholder.png`;
                           }}
                         />
@@ -255,7 +288,7 @@ export default function OffresTable() {
                 <td style={{ padding: "16px" }}>
                   {o.videoId ? (
                     <button
-                      onClick={() => openVideoPreview(o. videoId)}
+                      onClick={() => openVideoPreview(o.videoId)}
                       style={{
                         background: "linear-gradient(135deg, #ef4444, #dc2626)",
                         color: "white",
@@ -269,12 +302,12 @@ export default function OffresTable() {
                         boxShadow: "0 2px 8px rgba(239, 68, 68, 0.2)"
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget. style.transform = "translateY(-2px)";
-                        e.currentTarget.style. boxShadow = "0 4px 12px rgba(239, 68, 68, 0.3)";
+                        e.currentTarget.style.transform = "translateY(-2px)";
+                        e.currentTarget.style.boxShadow = "0 4px 12px rgba(239, 68, 68, 0.3)";
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.transform = "translateY(0)";
-                        e.currentTarget.style.boxShadow = "0 2px 8px rgba(239, 68, 68, 0. 2)";
+                        e.currentTarget.style.boxShadow = "0 2px 8px rgba(239, 68, 68, 0.2)";
                       }}
                     >
                       🎬 Aperçu
@@ -287,7 +320,7 @@ export default function OffresTable() {
                 {/* Statut */}
                 <td style={{ padding: "16px" }}>
                   <span style={{
-                    background: o.published ?  "#d1fae5" : "#fee2e2",
+                    background: o.published ? "#d1fae5" : "#fee2e2",
                     color: o.published ? "#065f46" : "#991b1b",
                     padding: "8px 12px",
                     borderRadius: "6px",
@@ -304,10 +337,9 @@ export default function OffresTable() {
                   {formatDate(o.createdAt || o.created_at)}
                 </td>
 
-                {/* Actions - 3 Boutons Séparés */}
+                {/* Actions */}
                 <td style={{ padding: "16px" }}>
                   <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                    {/* Modifier */}
                     <button
                       onClick={() => nav(`/admin/offres/${o.id}/edit`)}
                       style={{
@@ -319,7 +351,7 @@ export default function OffresTable() {
                         cursor: "pointer",
                         fontSize: "14px",
                         fontWeight: "700",
-                        transition: "all 0. 2s ease",
+                        transition: "all 0.2s ease",
                         boxShadow: "0 2px 8px rgba(79, 70, 229, 0.2)",
                         display: "flex",
                         alignItems: "center",
@@ -338,8 +370,6 @@ export default function OffresTable() {
                     >
                       ✏️ Modifier
                     </button>
-
-                    {/* Publier/Dépublier */}
                     <button
                       onClick={() => togglePublish(o.id, o.published)}
                       style={{
@@ -359,19 +389,17 @@ export default function OffresTable() {
                         whiteSpace: "nowrap"
                       }}
                       onMouseEnter={(e) => {
-                        e. currentTarget.style.transform = "translateY(-2px)";
-                        e.currentTarget.style.boxShadow = o. published ? "0 4px 12px rgba(249, 115, 115, 0.3)" : "0 4px 12px rgba(16, 185, 129, 0.3)";
+                        e.currentTarget.style.transform = "translateY(-2px)";
+                        e.currentTarget.style.boxShadow = o.published ? "0 4px 12px rgba(249, 115, 115, 0.3)" : "0 4px 12px rgba(16, 185, 129, 0.3)";
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.transform = "translateY(0)";
-                        e.currentTarget.style.boxShadow = o.published ?  "0 2px 8px rgba(249, 115, 115, 0.2)" : "0 2px 8px rgba(16, 185, 129, 0.2)";
+                        e.currentTarget.style.boxShadow = o.published ? "0 2px 8px rgba(249, 115, 115, 0.2)" : "0 2px 8px rgba(16, 185, 129, 0.2)";
                       }}
                       title={o.published ? "Dépublier cette annonce" : "Publier cette annonce"}
                     >
                       {o.published ? "🔒 Dépub" : "🔓 Publier"}
                     </button>
-
-                    {/* Supprimer */}
                     <button
                       onClick={() => deleteOffer(o.id)}
                       style={{
@@ -392,11 +420,11 @@ export default function OffresTable() {
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.transform = "translateY(-2px)";
-                        e.currentTarget.style. boxShadow = "0 4px 12px rgba(239, 68, 68, 0.3)";
+                        e.currentTarget.style.boxShadow = "0 4px 12px rgba(239, 68, 68, 0.3)";
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.transform = "translateY(0)";
-                        e.currentTarget. style.boxShadow = "0 2px 8px rgba(239, 68, 68, 0.2)";
+                        e.currentTarget.style.boxShadow = "0 2px 8px rgba(239, 68, 68, 0.2)";
                       }}
                       title="Supprimer définitivement cette annonce"
                     >
@@ -411,11 +439,11 @@ export default function OffresTable() {
       </div>
 
       {/* ImageLightbox */}
-      <ImageLightbox 
-        images={lbImages} 
-        startIndex={lbIndex} 
-        open={lbOpen} 
-        onClose={() => setLbOpen(false)} 
+      <ImageLightbox
+        images={lbImages}
+        startIndex={lbIndex}
+        open={lbOpen}
+        onClose={() => setLbOpen(false)}
       />
 
       {/* Video Preview Modal */}
@@ -495,13 +523,12 @@ export default function OffresTable() {
       <style>{`
         @media (max-width: 1024px) {
           table {
-            font-size: 14px ! important;
+            font-size: 14px !important;
           }
           table th, table td {
             padding: 14px !important;
           }
         }
-
         @media (max-width: 768px) {
           table {
             font-size: 13px !important;
@@ -518,7 +545,6 @@ export default function OffresTable() {
             font-size: 12px !important;
           }
         }
-
         @media (max-width: 480px) {
           table {
             font-size: 12px !important;
