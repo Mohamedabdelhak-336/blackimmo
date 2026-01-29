@@ -2,12 +2,16 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 /*
-  AdminLogin amélioré :
+  AdminLogin :
+  - Utilise VITE_API_URL pour requêtes backend (compatible prod Vercel/Railway)
   - show/hide password
   - message d'erreur animé
-  - bouton with loading state
+  - bouton état de chargement
   - envoie POST /api/admin/login (credentials include)
 */
+
+const API_URL = import.meta.env.VITE_API_URL; // Dépend de ta variable d’environnement
+
 export default function AdminLogin() {
   const [email, setEmail] = useState("admin@tonsite.com");
   const [password, setPassword] = useState("");
@@ -21,15 +25,14 @@ export default function AdminLogin() {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:4000/api/admin/login", {
+      const res = await fetch(`${API_URL}/api/admin/login`, {
         method: "POST",
-        credentials: "include",
+        credentials: "include", // important pour le cookie JWT
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
       if (!res.ok) {
-        // friendly message
         setError(data?.error || "Email ou mot de passe incorrect");
         setLoading(false);
         return;
@@ -101,7 +104,9 @@ export default function AdminLogin() {
           {loading && <span className="spinner" aria-hidden="true"></span>}
         </button>
 
-        <p className="mt-4 text-sm text-gray-500">Seul le compte admin peut accéder au tableau de bord.</p>
+        <p className="mt-4 text-sm text-gray-500">
+          Seul le compte admin peut accéder au tableau de bord.
+        </p>
       </form>
     </div>
   );
