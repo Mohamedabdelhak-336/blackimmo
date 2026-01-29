@@ -171,13 +171,12 @@ if (!ADMIN_EMAIL || !ADMIN_PW_HASH || !JWT_SECRET) {
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-  origin: CLIENT_ORIGIN,
+  origin: ["https://blackimmo.vercel.app", "https://www.mrblackimmobilier.com","http://localhost:5173"],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   exposedHeaders: ['Content-Length', 'Content-Type'],
 }));
-
 // Optional request logger (helpful for debugging)
 app.use((req, res, next) => {
   console.log(new Date().toISOString(), req.method, req.path);
@@ -380,7 +379,7 @@ app.post('/api/admin/login', async (req, res) => {
   if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
 
   if (email !== ADMIN_EMAIL) {
-    await new Promise(r => setTimeout(r, 400)); // slow down enumeration attacks
+    await new Promise(r => setTimeout(r, 400));
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
@@ -388,12 +387,13 @@ app.post('/api/admin/login', async (req, res) => {
   if (!match) return res.status(401).json({ error: 'Unauthorized' });
 
   const token = createToken({ email: ADMIN_EMAIL, role: 'admin' });
-  const isProd = process.env.NODE_ENV === 'production';
+
+  // ⚡️ Modif ici:
   res.cookie('admin_token', token, {
     httpOnly: true,
-    secure: isProd,
-    sameSite: 'lax',
-    maxAge: 1000 * 60 * 60 * 2, // 2 hours
+    secure: true,      // Toujours true en prod
+    sameSite: 'none',  // ← Permet le cookie cross-site entre Vercel et Railway
+    maxAge: 1000 * 60 * 60 * 2,
   });
 
   return res.json({ ok: true });
