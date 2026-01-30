@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import logo from "../../assets/logo.png";
 
 export default function CompanyInfo() {
-  const phonePrimary = "50 323 788";
+  const phonePrimary = "57230824";
   const phoneSecondary = "50323788";
   const whatsappNumber = "+21657230824";
   const email = "mrblackimmobilier@gmail.com";
