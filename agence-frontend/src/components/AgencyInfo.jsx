@@ -12,7 +12,7 @@ import logo from "../assets/logo.png"; // <-- ajoute ceci
 
 /* Replace these values with your real data if needed */
 const phone1 = "+21657230824";
-const phone2 = "50 323 788";
+const phone2 = "58870837";
 const insta = "https://www.instagram.com/mr.blackimmobilier/";
 const fb = "https://www.facebook.com/profile.php?id=61567196025352";
 const tiktok = "https://www.tiktok.com/@mr.black.immobili";
