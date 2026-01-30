@@ -84,7 +84,7 @@ export default function AdminCreateOffer() {
       
       photos.forEach((f) => form.append('photos', f));
 
-      const res = await fetch("http://localhost:4000/api/admin/offres", {
+      const res = await fetch('${API_URL}/api/admin/offres', {
         method: "POST",
         credentials: "include",
         body: form
